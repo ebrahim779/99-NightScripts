@@ -1,5 +1,5 @@
 – Pet Randomizer Script - Complete Working Version
-– Made by: munkizzz
+– Made by: Woz
 – Designed for Grow a Garden and similar pet games
 
 local Players = game:GetService(“Players”)
