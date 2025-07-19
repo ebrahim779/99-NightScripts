@@ -4,8 +4,8 @@ screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- إطار رئيسي (مع شكل متطور وقابل للتحريك)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -175)
+mainFrame.Size = UDim2.new(0, 350, 0, 400) -- زيادة الارتفاع لتحسين الترتيب
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
 mainFrame.BackgroundColor3 = Color3.fromRGB(139, 69, 19)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
@@ -67,57 +67,75 @@ titleLabel.Parent = mainFrame
 
 local madeByLabel = Instance.new("TextLabel")
 madeByLabel.Size = UDim2.new(1, -40, 0, 20)
-madeByLabel.Position = UDim2.new(0, 0, 0.7, 0)
+madeByLabel.Position = UDim2.new(0, 0, 0.85, 0)
 madeByLabel.BackgroundTransparency = 1
 madeByLabel.Text = "Made by - munkizzz ✨"
 madeByLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 madeByLabel.Font = Enum.Font.Gotham
 madeByLabel.TextSize = 14
-madeByLabel.Parent = titleLabel
+madeByLabel.Parent = mainFrame
 
--- زر Randomize Eggs
+-- زر Randomize Eggs (أعلى الأزرار)
 local randomizeButton = Instance.new("TextButton")
-randomizeButton.Size = UDim2.new(1, -10, 0, 50)
-randomizeButton.Position = UDim2.new(0.05, 0, 0.25, 0)
+randomizeButton.Size = UDim2.new(0.9, 0, 0, 50)
+randomizeButton.Position = UDim2.new(0.05, 0, 0.2, 0)
 randomizeButton.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
 randomizeButton.Text = "Randomize Eggs 🎲"
 randomizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 randomizeButton.Font = Enum.Font.GothamBold
 randomizeButton.Parent = mainFrame
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(0, 10)
-buttonCorner.Parent = randomizeButton
+local buttonGradient1 = Instance.new("UIGradient")
+buttonGradient1.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 165, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 140, 0))
+}
+buttonGradient1.Parent = randomizeButton
+local buttonCorner1 = Instance.new("UICorner")
+buttonCorner1.CornerRadius = UDim.new(0, 10)
+buttonCorner1.Parent = randomizeButton
 
--- خيار ESP
+-- خيار ESP (في الأعلى)
 local espToggle = Instance.new("TextButton")
-espToggle.Size = UDim2.new(1, -10, 0, 50)
-espToggle.Position = UDim2.new(0.05, 0, 0.4, 0)
+espToggle.Size = UDim2.new(0.9, 0, 0, 50)
+espToggle.Position = UDim2.new(0.05, 0, 0.32, 0)
 espToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 espToggle.Text = "ESP: OFF 👁️"
 espToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 espToggle.Font = Enum.Font.GothamBold
 espToggle.Parent = mainFrame
-local espCorner = Instance.new("UICorner")
-espCorner.CornerRadius = UDim.new(0, 10)
-espCorner.Parent = espToggle
+local buttonGradient2 = Instance.new("UIGradient")
+buttonGradient2.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 70, 70))
+}
+buttonGradient2.Parent = espToggle
+local buttonCorner2 = Instance.new("UICorner")
+buttonCorner2.CornerRadius = UDim.new(0, 10)
+buttonCorner2.Parent = espToggle
 
--- خيار Auto Randomize
+-- خيار Auto Randomize (في الأسفل)
 local autoToggle = Instance.new("TextButton")
-autoToggle.Size = UDim2.new(1, -10, 0, 50)
-autoToggle.Position = UDim2.new(0.05, 0, 0.55, 0)
+autoToggle.Size = UDim2.new(0.9, 0, 0, 50)
+autoToggle.Position = UDim2.new(0.05, 0, 0.44, 0)
 autoToggle.BackgroundColor3 = Color3.fromRGB(0, 128, 0)
 autoToggle.Text = "Auto Randomize: OFF 🔄"
 autoToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 autoToggle.Font = Enum.Font.GothamBold
 autoToggle.Parent = mainFrame
-local autoCorner = Instance.new("UICorner")
-autoCorner.CornerRadius = UDim.new(0, 10)
-autoCorner.Parent = autoToggle
+local buttonGradient3 = Instance.new("UIGradient")
+buttonGradient3.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 128, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+buttonGradient3.Parent = autoToggle
+local buttonCorner3 = Instance.new("UICorner")
+buttonCorner3.CornerRadius = UDim.new(0, 10)
+buttonCorner3.Parent = autoToggle
 
 -- منطقة عرض اسم الحيوان
 local petDisplay = Instance.new("TextLabel")
 petDisplay.Size = UDim2.new(0.9, 0, 0, 50)
-petDisplay.Position = UDim2.new(0.05, 0, 0.75, -50)
+petDisplay.Position = UDim2.new(0.05, 0, 0.6, 0)
 petDisplay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 petDisplay.Text = "New Pet: Unknown 🐾"
 petDisplay.TextColor3 = Color3.fromRGB(255, 255, 0)
@@ -131,7 +149,7 @@ displayCorner.Parent = petDisplay
 -- شريط تقدم لـ Auto Randomize
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0.9, 0, 0, 10)
-progressBar.Position = UDim2.new(0.05, 0, 0.85, -10)
+progressBar.Position = UDim2.new(0.05, 0, 0.72, 0)
 progressBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 progressBar.Parent = mainFrame
 local progressCorner = Instance.new("UICorner")
