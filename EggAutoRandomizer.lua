@@ -161,4 +161,3 @@ print(”- 👁️ ESP Toggle”)
 print(”- 🔄 Auto Randomize”)
 print(”- ⏱️ Speed Control”)
 print(“Made by munkizzz ⭐”)
-الكود يصلح لي اي موقع من الاثنين
