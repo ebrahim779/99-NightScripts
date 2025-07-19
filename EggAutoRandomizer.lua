@@ -204,68 +204,208 @@ tweenIn:Play()
 
 end
 
-– وظيفة اكتشاف البيض تلقائيًا
+– وظيفة اكتشاف البيض في لعبة Grow a Garden
 local function detectEggs()
-local potentialEggs = {}
-for _, obj in pairs(game.Workspace:GetDescendants()) do
-if obj:IsA(“Model”) and obj.Name:lower():find(“egg”) then
-table.insert(potentialEggs, obj)
-end
-end
-return potentialEggs
+local eggs = {}
+
+```
+-- البحث في أماكن مختلفة حيث قد توجد البيض
+local searchLocations = {
+    game.Workspace,
+    game.Workspace:FindFirstChild("Eggs"),
+    game.Workspace:FindFirstChild("Items"),
+    game.Workspace:FindFirstChild("Collectibles"),
+    game.Workspace:FindFirstChild("Garden"),
+    game.Workspace:FindFirstChild("Map")
+}
+
+for _, location in pairs(searchLocations) do
+    if location then
+        for _, obj in pairs(location:GetDescendants()) do
+            -- البحث عن البيض بطرق مختلفة
+            if obj:IsA("Part") or obj:IsA("UnionOperation") or obj:IsA("Model") then
+                local objName = obj.Name:lower()
+                -- أنماط مختلفة لأسماء البيض في Grow a Garden
+                if objName:find("egg") or 
+                   objName:find("بيض") or 
+                   objName:find("ovum") or
+                   (obj:IsA("Part") and obj.Shape == Enum.PartType.Ball and obj.Size.X < 10) or
+                   (obj.Parent and obj.Parent.Name:lower():find("egg")) then
+                    table.insert(eggs, obj)
+                end
+            end
+        end
+    end
 end
 
-– وظيفة تغيير الحيوانات الأليفة داخل البيض
+-- البحث في مخزون اللاعب أيضاً
+local player = game.Players.LocalPlayer
+if player.Character then
+    for _, obj in pairs(player.Character:GetDescendants()) do
+        if obj.Name:lower():find("egg") then
+            table.insert(eggs, obj)
+        end
+    end
+end
+
+return eggs
+```
+
+end
+
+– وظيفة تطبيق تأثيرات عشوائية على البيض
 local function randomizeEggs()
 local eggs = detectEggs()
-if #eggs == 0 then return end
-for _, egg in pairs(eggs) do
-if egg:IsA(“Model”) then
-local petInside = egg:FindFirstChild(“Pet”)
-if petInside then
-local newPet = game.Workspace.Pets:FindFirstChildOfClass(“Model”)
-if newPet then
-petInside:Destroy()
-newPet:Clone().Parent = egg
-local randomPosition = Vector3.new(math.random(-50, 50), egg.Position.Y, math.random(-50, 50))
-pcall(function() egg:MoveTo(randomPosition) end)
-end
-end
-end
-end
+local effectsApplied = 0
+
+```
+if #eggs == 0 then 
+    print("❌ No eggs found in the game!")
+    return 
 end
 
-– وظيفة ESP (عرض البيض)
+print("🔍 Found " .. #eggs .. " eggs, applying randomization...")
+
+for _, egg in pairs(eggs) do
+    if egg and egg.Parent then
+        -- تطبيق تأثيرات مختلفة حسب نوع الكائن
+        pcall(function()
+            -- تغيير اللون عشوائياً
+            if egg:IsA("Part") then
+                egg.BrickColor = BrickColor.Random()
+                egg.Material = Enum.Material.Neon
+                effectsApplied = effectsApplied + 1
+            end
+            
+            -- تغيير الحجم قليلاً
+            if egg.Size then
+                local scale = math.random(80, 120) / 100
+                egg.Size = egg.Size * scale
+            end
+            
+            -- إضافة تأثير بريق
+            local sparkles = egg:FindFirstChild("Sparkles") or Instance.new("Sparkles")
+            sparkles.Parent = egg
+            sparkles.SparkleColor = Color3.new(math.random(), math.random(), math.random())
+            
+            -- تدوير عشوائي
+            if egg.CFrame then
+                egg.CFrame = egg.CFrame * CFrame.Angles(
+                    math.rad(math.random(-30, 30)),
+                    math.rad(math.random(-30, 30)),
+                    math.rad(math.random(-30, 30))
+                )
+            end
+            
+            -- إضافة ClickDetector للتفاعل
+            if not egg:FindFirstChild("ClickDetector") then
+                local click = Instance.new("ClickDetector")
+                click.Parent = egg
+                click.MouseClick:Connect(function()
+                    print("🥚 Clicked randomized egg!")
+                end)
+            end
+            
+        end)
+    end
+end
+
+print("✅ Applied randomization to " .. effectsApplied .. " eggs!")
+```
+
+end
+
+– وظيفة ESP محسنة لجميع البيض
 local function toggleESP()
 local espState = espToggle.Text:find(“ON”) ~= nil
 local eggs = detectEggs()
-if #eggs == 0 then return end
-for _, egg in pairs(eggs) do
-if egg:IsA(“Model”) then
-local highlight = egg:FindFirstChild(“EggHighlight”) or Instance.new(“Highlight”)
-highlight.Name = “EggHighlight”
-highlight.Parent = egg
-highlight.Enabled = not espState
-highlight.FillColor = Color3.fromRGB(255, 215, 0)
-highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
-end
-end
-espToggle.Text = “👁️ ESP: “ .. (espState and “OFF” or “ON”)
-espToggle.BackgroundColor3 = espState and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 100, 200)
+
+```
+if #eggs == 0 then 
+    print("❌ No eggs found for ESP!")
+    return 
 end
 
-– وظيفة Auto Randomize
+print("👁️ Toggling ESP for " .. #eggs .. " eggs...")
+
+for _, egg in pairs(eggs) do
+    if egg and egg.Parent then
+        pcall(function()
+            -- إزالة أو إضافة Highlight
+            local highlight = egg:FindFirstChild("EggHighlight")
+            if espState then
+                -- إيقاف ESP
+                if highlight then highlight:Destroy() end
+                local billboard = egg:FindFirstChild("EggBillboard")
+                if billboard then billboard:Destroy() end
+            else
+                -- تشغيل ESP
+                if not highlight then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "EggHighlight"
+                    highlight.Parent = egg
+                    highlight.FillColor = Color3.fromRGB(255, 215, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+                    highlight.FillTransparency = 0.5
+                    highlight.OutlineTransparency = 0
+                end
+                
+                -- إضافة نص فوق البيضة
+                if not egg:FindFirstChild("EggBillboard") and egg:FindFirstChildOfClass("Part") then
+                    local billboard = Instance.new("BillboardGui")
+                    billboard.Name = "EggBillboard"
+                    billboard.Parent = egg:FindFirstChildOfClass("Part")
+                    billboard.Size = UDim2.new(0, 100, 0, 50)
+                    billboard.StudsOffset = Vector3.new(0, 2, 0)
+                    
+                    local label = Instance.new("TextLabel")
+                    label.Parent = billboard
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.Text = "🥚 EGG"
+                    label.TextColor3 = Color3.fromRGB(255, 255, 0)
+                    label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    label.TextStrokeTransparency = 0
+                    label.Font = Enum.Font.SourceSansBold
+                    label.TextScaled = true
+                end
+            end
+        end)
+    end
+end
+
+espToggle.Text = "👁️ ESP: " .. (espState and "OFF" or "ON")
+espToggle.BackgroundColor3 = espState and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 100, 200)
+print("✅ ESP " .. (espState and "disabled" or "enabled") .. "!")
+```
+
+end
+
+– وظيفة Auto Randomize محسنة
 local autoRunning = false
+local autoConnection = nil
+
 local function toggleAutoRandomize()
 autoRunning = not autoRunning
 autoToggle.Text = “⚡ Auto Randomize: “ .. (autoRunning and “ON” or “OFF”)
 autoToggle.BackgroundColor3 = autoRunning and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(0, 128, 0)
-spawn(function()
-while autoRunning do
-randomizeEggs()
-wait(5)
+
+```
+if autoRunning then
+    print("🔄 Auto Randomize started!")
+    autoConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        wait(3) -- فترة انتظار أقل لتأثير أسرع
+        randomizeEggs()
+    end)
+else
+    print("⏹️ Auto Randomize stopped!")
+    if autoConnection then
+        autoConnection:Disconnect()
+        autoConnection = nil
+    end
 end
-end)
+```
+
 end
 
 – ربط الأحداث
@@ -276,4 +416,6 @@ closeButton.MouseButton1Click:Connect(hideMenu)
 closeButtonX.MouseButton1Click:Connect(hideMenu)
 reopenButton.MouseButton1Click:Connect(showMenu)
 
-print(“🥚 Egg Randomizer GUI loaded successfully! You can now drag the menu around and close/reopen it.”)
+print(“🥚 Advanced Egg Randomizer for Grow a Garden loaded successfully!”)
+print(“📋 Features: Drag menu, randomize all eggs, ESP with labels, auto-randomize”)
+print(“🎮 The script will work on ALL eggs found in the game world!”)
