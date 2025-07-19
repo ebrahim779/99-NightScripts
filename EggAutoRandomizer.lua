@@ -1,163 +1,107 @@
-– تحميل مكتبة Kavo UI (Loading Kavo UI Library)
-local Library = loadstring(game:HttpGet(“https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua”))()
+-- إنشاء واجهة المستخدم (GUI)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-– إنشاء النافذة الرئيسية (Creating Main Window)
-local Window = Library.CreateLib(“Pet Randomizer ✨”, “BloodTheme”)
+-- إطار رئيسي
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
+mainFrame.Parent = screenGui
 
-– إنشاء تبويب العشوائية (Creating Randomize Tab)
-local Tab = Window:NewTab(“🎲 Randomize Pets”)
+-- عنوان Pet Randomizer
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundColor3 = Color3.fromRGB(139, 69, 19)
+titleLabel.Text = "Pet Randomizer"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.Parent = mainFrame
 
-– إنشاء قسم الحيوانات الأليفة (Creating Pet Section)
-local Section = Tab:NewSection(“Pet Controls”)
+-- زر Randomize Pets
+local randomizeButton = Instance.new("TextButton")
+randomizeButton.Size = UDim2.new(0.8, 0, 0, 50)
+randomizeButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+randomizeButton.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+randomizeButton.Text = "Randomize Pets"
+randomizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+randomizeButton.Font = Enum.Font.SourceSansBold
+randomizeButton.Parent = mainFrame
 
-– متغيرات التحكم (Control Variables)
-local espEnabled = false
-local autoRandomizeEnabled = false
-local autoRandomizeConnection = nil
+-- خيار ESP
+local espToggle = Instance.new("TextButton")
+espToggle.Size = UDim2.new(0.8, 0, 0, 50)
+espToggle.Position = UDim2.new(0.1, 0, 0.5, 0)
+espToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+espToggle.Text = "ESP: ON"
+espToggle.TextColor3 = Color3.fromRGB(0, 191, 255)
+espToggle.Font = Enum.Font.SourceSansBold
+espToggle.Parent = mainFrame
 
-– زر عشوائية الحيوانات الأليفة (Randomize Pets Button)
-Section:NewButton(“🎲 Randomize Pets”, “Click to randomize your pets”, function()
-print(“Pet randomization activated!”)
-– هنا ضع كود عشوائية الحيوانات (Put your pet randomization code here)
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “Pet Randomizer”;
-Text = “Pets randomized successfully!”;
-Duration = 3;
-})
-end)
+-- خيار Auto Randomize
+local autoToggle = Instance.new("TextButton")
+autoToggle.Size = UDim2.new(0.8, 0, 0, 50)
+autoToggle.Position = UDim2.new(0.1, 0, 0.7, 0)
+autoToggle.BackgroundColor3 = Color3.fromRGB(0, 128, 0)
+autoToggle.Text = "Auto Randomize: OFF"
+autoToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoToggle.Font = Enum.Font.SourceSansBold
+autoToggle.Parent = mainFrame
 
-– تبديل ESP (ESP Toggle)
-Section:NewToggle(“👁️ ESP”, “Enable/Disable ESP feature”, function(state)
-espEnabled = state
-if espEnabled then
-print(“ESP: ON”)
-– كود تشغيل ESP (ESP activation code)
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “ESP Status”;
-Text = “ESP is now ON”;
-Duration = 2;
-})
-else
-print(“ESP: OFF”)
-– كود إيقاف ESP (ESP deactivation code)
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “ESP Status”;
-Text = “ESP is now OFF”;
-Duration = 2;
-})
-end
-end)
-
-– تبديل العشوائية التلقائية (Auto Randomize Toggle)
-Section:NewToggle(“🔄 Auto Randomize”, “Enable/Disable automatic pet randomization”, function(state)
-autoRandomizeEnabled = state
-
-```
-if autoRandomizeEnabled then
-    print("Auto Randomize: ON")
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Auto Randomize";
-        Text = "Auto Randomize is now ON";
-        Duration = 2;
-    })
-    
-    -- بدء العشوائية التلقائية (Start auto randomization)
-    autoRandomizeConnection = game:GetService("RunService").Heartbeat:Connect(function()
-        wait(5) -- انتظار 5 ثوانٍ بين كل عشوائية (Wait 5 seconds between randomizations)
-        if autoRandomizeEnabled then
-            print("Auto randomizing pets...")
-            -- هنا ضع كود العشوائية التلقائية (Put your auto randomization code here)
+-- وظيفة اكتشاف الحيوانات الأليفة تلقائيًا
+local function detectPets()
+    local potentialPets = {}
+    for _, obj in pairs(game.Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
+            table.insert(potentialPets, obj)
         end
-    end)
-    
-else
-    print("Auto Randomize: OFF")
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Auto Randomize";
-        Text = "Auto Randomize is now OFF";
-        Duration = 2;
-    })
-    
-    -- إيقاف العشوائية التلقائية (Stop auto randomization)
-    if autoRandomizeConnection then
-        autoRandomizeConnection:Disconnect()
-        autoRandomizeConnection = nil
+    end
+    return potentialPets
+end
+
+-- وظيفة تحديد الحيوانات الأليفة بشكل عشوائي
+local function randomizePets()
+    local pets = detectPets()
+    for _, pet in pairs(pets) do
+        if pet:IsA("Model") then
+            local randomPosition = Vector3.new(math.random(-50, 50), 0, math.random(-50, 50))
+            pet:MoveTo(randomPosition)
+        end
     end
 end
-```
 
-end)
-
-– قسم إضافي للإعدادات (Additional Settings Section)
-local SettingsSection = Tab:NewSection(“Settings”)
-
-– شريط منزلق لسرعة العشوائية التلقائية (Auto Randomize Speed Slider)
-SettingsSection:NewSlider(“⏱️ Auto Speed”, “Set auto randomize speed (seconds)”, 10, 1, function(value)
-print(“Auto randomize speed set to: “ .. value .. “ seconds”)
-– يمكنك استخدام هذه القيمة لتعديل سرعة العشوائية التلقائية
-– (You can use this value to modify auto randomization speed)
-end)
-
-– مربع نص للإعدادات المخصصة (Text Box for Custom Settings)
-SettingsSection:NewTextBox(“🔧 Custom Command”, “Enter custom command”, function(text)
-print(“Custom command entered: “ .. text)
-– معالجة الأوامر المخصصة (Handle custom commands)
-if text:lower() == “reset” then
-– إعادة تعيين الإعدادات (Reset settings)
-espEnabled = false
-autoRandomizeEnabled = false
-if autoRandomizeConnection then
-autoRandomizeConnection:Disconnect()
-autoRandomizeConnection = nil
+-- وظيفة ESP (عرض الحيوانات الأليفة)
+local function toggleESP()
+    local espState = espToggle.Text == "ESP: ON"
+    local pets = detectPets()
+    for _, pet in pairs(pets) do
+        if pet:IsA("Model") then
+            local highlight = pet:FindFirstChild("PetHighlight") or Instance.new("Highlight")
+            highlight.Name = "PetHighlight"
+            highlight.Parent = pet
+            highlight.Enabled = espState
+            highlight.FillColor = Color3.fromRGB(0, 255, 0)
+            highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+        end
+    end
+    espToggle.Text = "ESP: " .. (espState and "OFF" or "ON")
 end
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “Reset”;
-Text = “All settings have been reset!”;
-Duration = 3;
-})
+
+-- وظيفة Auto Randomize
+local autoRunning = false
+local function toggleAutoRandomize()
+    autoRunning = not autoRunning
+    autoToggle.Text = "Auto Randomize: " .. (autoRunning and "ON" or "OFF")
+    spawn(function()
+        while autoRunning do
+            randomizePets()
+            wait(5) -- كل 5 ثوانٍ
+        end
+    end)
 end
-end)
 
-– قسم المعلومات (Information Section)
-local InfoSection = Tab:NewSection(“Information”)
-
-– زر المعلومات (Info Button)
-InfoSection:NewButton(“ℹ️ Script Info”, “View script information”, function()
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “Pet Randomizer”;
-Text = “Made by - munkizzz ⭐”;
-Duration = 5;
-})
-print(“Script created by munkizzz”)
-end)
-
-– زر إعادة تحميل الواجهة (Reload UI Button)
-InfoSection:NewButton(“🔄 Reload UI”, “Reload the user interface”, function()
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “Reloading”;
-Text = “Reloading UI…”;
-Duration = 2;
-})
-
-```
-wait(1)
--- إعادة تحميل السكريبت (Reload the script)
-loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-```
-
-end)
-
-– رسالة الترحيب (Welcome Message)
-game:GetService(“StarterGui”):SetCore(“SendNotification”, {
-Title = “Pet Randomizer Loaded! ✨”;
-Text = “Welcome! Script is ready to use.”;
-Duration = 4;
-})
-
-print(“Pet Randomizer script loaded successfully!”)
-print(“Features available:”)
-print(”- 🎲 Randomize Pets”)
-print(”- 👁️ ESP Toggle”)
-print(”- 🔄 Auto Randomize”)
-print(”- ⏱️ Speed Control”)
-print(“Made by munkizzz ⭐”)
+-- ربط الأحداث لتشغيل الأوامر
+randomizeButton.MouseButton1Click:Connect(randomizePets)
+espToggle.MouseButton1Click:Connect(toggleESP)
+autoToggle.MouseButton1Click:Connect(toggleAutoRandomize)
