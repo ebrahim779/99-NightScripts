@@ -1,489 +1,467 @@
-– Enhanced Egg Randomizer Script
-– إصدار محسن ومتطور
+– Pet Randomizer UI for Roblox (تعليمي فقط)
+– ضع هذا السكريبت في StarterGui أو كـ LocalScript
 
-– خدمات اللعبة
 local Players = game:GetService(“Players”)
+local UserInputService = game:GetService(“UserInputService”)
 local TweenService = game:GetService(“TweenService”)
 local RunService = game:GetService(“RunService”)
-local UserInputService = game:GetService(“UserInputService”)
-local SoundService = game:GetService(“SoundService”)
 
-– متغيرات أساسية
-local localPlayer = Players.LocalPlayer
-local playerGui = localPlayer:WaitForChild(“PlayerGui”)
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild(“PlayerGui”)
 
-– حالات النظام
-local SystemStates = {
-espEnabled = false,
-autoRandomizeEnabled = false,
-soundEnabled = true,
-notifications = true
-}
-
-– إعدادات الألوان والتصميم
-local UIColors = {
-primary = Color3.fromRGB(45, 45, 55),
-secondary = Color3.fromRGB(35, 35, 45),
-accent = Color3.fromRGB(255, 165, 0),
-success = Color3.fromRGB(46, 204, 113),
-danger = Color3.fromRGB(231, 76, 60),
-warning = Color3.fromRGB(241, 196, 15),
-text = Color3.fromRGB(255, 255, 255),
-textSecondary = Color3.fromRGB(189, 195, 199)
-}
-
-– إنشاء الواجهة الرئيسية
-local function createMainUI()
-– حاوي الواجهة الرئيسي
+– إنشاء ScreenGui
 local screenGui = Instance.new(“ScreenGui”)
-screenGui.Name = “EnhancedEggRandomizer”
-screenGui.ResetOnSpawn = false
+screenGui.Name = “PetRandomizerGUI”
 screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
 
-```
--- الإطار الرئيسي مع تأثيرات بصرية
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 380, 0, 450)
-mainFrame.Position = UDim2.new(1.2, 0, 0.5, -225)
-mainFrame.BackgroundColor3 = UIColors.primary
+– الإعدادات
+local settings = {
+esp = true,
+autoRandomize = false,
+visible = true
+}
+
+– إنشاء الإطار الرئيسي
+local mainFrame = Instance.new(“Frame”)
+mainFrame.Name = “MainFrame”
+mainFrame.Size = UDim2.new(0, 350, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 
--- تأثير الظل
-local shadow = Instance.new("Frame")
-shadow.Name = "Shadow"
-shadow.Size = UDim2.new(1, 6, 1, 6)
-shadow.Position = UDim2.new(0, -3, 0, -3)
-shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-shadow.BackgroundTransparency = 0.7
-shadow.BorderSizePixel = 0
-shadow.ZIndex = mainFrame.ZIndex - 1
-shadow.Parent = mainFrame
-
--- تأثير التدرج في الخلفية
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, UIColors.primary),
-    ColorSequenceKeypoint.new(1, UIColors.secondary)
-}
-gradient.Rotation = 45
-gradient.Parent = mainFrame
-
--- زوايا مستديرة
-local corner = Instance.new("UICorner")
+– إضافة Corner للتدوير
+local corner = Instance.new(“UICorner”)
 corner.CornerRadius = UDim.new(0, 15)
 corner.Parent = mainFrame
 
-local shadowCorner = corner:Clone()
-shadowCorner.Parent = shadow
+– إنشاء الهيدر
+local header = Instance.new(“Frame”)
+header.Name = “Header”
+header.Size = UDim2.new(1, 0, 0, 60)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundColor3 = Color3.fromRGB(139, 90, 60)
+header.BorderSizePixel = 0
+header.Parent = mainFrame
 
-return screenGui, mainFrame
-```
+local headerCorner = Instance.new(“UICorner”)
+headerCorner.CornerRadius = UDim.new(0, 15)
+headerCorner.Parent = header
 
-end
-
-– إنشاء شريط العنوان
-local function createTitleBar(parent)
-local titleBar = Instance.new(“Frame”)
-titleBar.Name = “TitleBar”
-titleBar.Size = UDim2.new(1, 0, 0, 60)
-titleBar.Position = UDim2.new(0, 0, 0, 0)
-titleBar.BackgroundColor3 = UIColors.accent
-titleBar.BorderSizePixel = 0
-titleBar.Parent = parent
-
-```
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 15)
-titleCorner.Parent = titleBar
-
--- إخفاء الزوايا السفلية
-local bottomCover = Instance.new("Frame")
-bottomCover.Size = UDim2.new(1, 0, 0, 15)
-bottomCover.Position = UDim2.new(0, 0, 1, -15)
-bottomCover.BackgroundColor3 = UIColors.accent
-bottomCover.BorderSizePixel = 0
-bottomCover.Parent = titleBar
-
--- عنوان النافذة
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.new(1, -120, 1, 0)
-titleLabel.Position = UDim2.new(0, 60, 0, 0)
+– نص العنوان
+local titleLabel = Instance.new(“TextLabel”)
+titleLabel.Name = “TitleLabel”
+titleLabel.Size = UDim2.new(1, -20, 1, -20)
+titleLabel.Position = UDim2.new(0, 10, 0, 10)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "🥚 Enhanced Egg Randomizer"
-titleLabel.TextColor3 = UIColors.text
+titleLabel.Text = “🐾 Pet Randomizer ✨”
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 18
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.Parent = titleBar
+titleLabel.Parent = header
 
--- أيقونة البرنامج
-local iconLabel = Instance.new("TextLabel")
-iconLabel.Name = "IconLabel"
-iconLabel.Size = UDim2.new(0, 50, 1, 0)
-iconLabel.Position = UDim2.new(0, 5, 0, 0)
-iconLabel.BackgroundTransparency = 1
-iconLabel.Text = "🎲"
-iconLabel.TextColor3 = UIColors.text
-iconLabel.Font = Enum.Font.Gotham
-iconLabel.TextSize = 24
-iconLabel.Parent = titleBar
-
--- معلومات المطور
-local creatorLabel = Instance.new("TextLabel")
-creatorLabel.Name = "CreatorLabel"
-creatorLabel.Size = UDim2.new(0, 110, 1, 0)
-creatorLabel.Position = UDim2.new(1, -115, 0, 0)
+– نص المطور
+local creatorLabel = Instance.new(“TextLabel”)
+creatorLabel.Name = “CreatorLabel”
+creatorLabel.Size = UDim2.new(1, -20, 0, 15)
+creatorLabel.Position = UDim2.new(0, 10, 1, -25)
 creatorLabel.BackgroundTransparency = 1
-creatorLabel.Text = "by munkizzz"
-creatorLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+creatorLabel.Text = “Made by - munkizzz”
+creatorLabel.TextColor3 = Color3.fromRGB(212, 165, 116)
+creatorLabel.TextScaled = true
 creatorLabel.Font = Enum.Font.Gotham
-creatorLabel.TextSize = 12
-creatorLabel.TextXAlignment = Enum.TextXAlignment.Right
-creatorLabel.Parent = titleBar
+creatorLabel.Parent = header
 
-return titleBar
-```
+– زر Randomize Pets
+local randomizeButton = Instance.new(“TextButton”)
+randomizeButton.Name = “RandomizeButton”
+randomizeButton.Size = UDim2.new(1, -20, 0, 35)
+randomizeButton.Position = UDim2.new(0, 10, 0, 70)
+randomizeButton.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
+randomizeButton.Text = “🎲 Randomize Pets”
+randomizeButton.TextColor3 = Color3.new(1, 1, 1)
+randomizeButton.TextScaled = true
+randomizeButton.Font = Enum.Font.GothamSemibold
+randomizeButton.BorderSizePixel = 0
+randomizeButton.Parent = mainFrame
 
-end
+local randomizeCorner = Instance.new(“UICorner”)
+randomizeCorner.CornerRadius = UDim.new(0, 5)
+randomizeCorner.Parent = randomizeButton
 
-– إنشاء زر محسن
-local function createEnhancedButton(name, text, icon, color, parent)
-local button = Instance.new(“TextButton”)
-button.Name = name
-button.Size = UDim2.new(1, -20, 0, 50)
-button.BackgroundColor3 = color
-button.BorderSizePixel = 0
-button.Font = Enum.Font.GothamSemibold
-button.TextColor3 = UIColors.text
-button.TextSize = 14
-button.Parent = parent
+– ESP Toggle
+local espFrame = Instance.new(“Frame”)
+espFrame.Name = “ESPFrame”
+espFrame.Size = UDim2.new(1, -20, 0, 30)
+espFrame.Position = UDim2.new(0, 10, 0, 115)
+espFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+espFrame.BorderSizePixel = 0
+espFrame.Parent = mainFrame
 
-```
--- زوايا مستديرة
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(0, 8)
-buttonCorner.Parent = button
+local espCorner = Instance.new(“UICorner”)
+espCorner.CornerRadius = UDim.new(0, 5)
+espCorner.Parent = espFrame
 
--- تأثير الضغط
-local pressEffect = Instance.new("Frame")
-pressEffect.Name = "PressEffect"
-pressEffect.Size = UDim2.new(1, 0, 1, 0)
-pressEffect.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-pressEffect.BackgroundTransparency = 1
-pressEffect.BorderSizePixel = 0
-pressEffect.Parent = button
+local espLabel = Instance.new(“TextLabel”)
+espLabel.Name = “ESPLabel”
+espLabel.Size = UDim2.new(0.7, 0, 1, 0)
+espLabel.Position = UDim2.new(0, 10, 0, 0)
+espLabel.BackgroundTransparency = 1
+espLabel.Text = “👁️ ESP”
+espLabel.TextColor3 = Color3.new(1, 1, 1)
+espLabel.TextScaled = true
+espLabel.Font = Enum.Font.Gotham
+espLabel.TextXAlignment = Enum.TextXAlignment.Left
+espLabel.Parent = espFrame
 
-local pressCorner = buttonCorner:Clone()
-pressCorner.Parent = pressEffect
+local espStatus = Instance.new(“TextLabel”)
+espStatus.Name = “ESPStatus”
+espStatus.Size = UDim2.new(0.3, -10, 1, 0)
+espStatus.Position = UDim2.new(0.7, 0, 0, 0)
+espStatus.BackgroundTransparency = 1
+espStatus.Text = “ON”
+espStatus.TextColor3 = Color3.fromRGB(72, 187, 120)
+espStatus.TextScaled = true
+espStatus.Font = Enum.Font.GothamBold
+espStatus.Parent = espFrame
 
--- النص والأيقونة
-local buttonText = Instance.new("TextLabel")
-buttonText.Name = "ButtonText"
-buttonText.Size = UDim2.new(1, -50, 1, 0)
-buttonText.Position = UDim2.new(0, 45, 0, 0)
-buttonText.BackgroundTransparency = 1
-buttonText.Text = text
-buttonText.TextColor3 = UIColors.text
-buttonText.Font = Enum.Font.GothamSemibold
-buttonText.TextSize = 14
-buttonText.TextXAlignment = Enum.TextXAlignment.Left
-buttonText.Parent = button
+– Auto Randomize Toggle
+local autoFrame = Instance.new(“Frame”)
+autoFrame.Name = “AutoFrame”
+autoFrame.Size = UDim2.new(1, -20, 0, 30)
+autoFrame.Position = UDim2.new(0, 10, 0, 155)
+autoFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+autoFrame.BorderSizePixel = 0
+autoFrame.Parent = mainFrame
 
-local buttonIcon = Instance.new("TextLabel")
-buttonIcon.Name = "ButtonIcon"
-buttonIcon.Size = UDim2.new(0, 40, 1, 0)
-buttonIcon.Position = UDim2.new(0, 5, 0, 0)
-buttonIcon.BackgroundTransparency = 1
-buttonIcon.Text = icon
-buttonIcon.TextColor3 = UIColors.text
-buttonIcon.Font = Enum.Font.Gotham
-buttonIcon.TextSize = 18
-buttonIcon.Parent = button
+local autoCorner = Instance.new(“UICorner”)
+autoCorner.CornerRadius = UDim.new(0, 5)
+autoCorner.Parent = autoFrame
 
--- تأثيرات بصرية
-button.MouseEnter:Connect(function()
-    local hoverTween = TweenService:Create(button, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(
-            math.min(255, color.R * 255 + 20),
-            math.min(255, color.G * 255 + 20),
-            math.min(255, color.B * 255 + 20)
-        )
-    })
-    hoverTween:Play()
-end)
+local autoLabel = Instance.new(“TextLabel”)
+autoLabel.Name = “AutoLabel”
+autoLabel.Size = UDim2.new(0.7, 0, 1, 0)
+autoLabel.Position = UDim2.new(0, 10, 0, 0)
+autoLabel.BackgroundTransparency = 1
+autoLabel.Text = “🔄 Auto Randomize”
+autoLabel.TextColor3 = Color3.new(1, 1, 1)
+autoLabel.TextScaled = true
+autoLabel.Font = Enum.Font.Gotham
+autoLabel.TextXAlignment = Enum.TextXAlignment.Left
+autoLabel.Parent = autoFrame
 
-button.MouseLeave:Connect(function()
-    local unhoverTween = TweenService:Create(button, TweenInfo.new(0.2), {
-        BackgroundColor3 = color
-    })
-    unhoverTween:Play()
-end)
+local autoStatus = Instance.new(“TextLabel”)
+autoStatus.Name = “AutoStatus”
+autoStatus.Size = UDim2.new(0.3, -10, 1, 0)
+autoStatus.Position = UDim2.new(0.7, 0, 0, 0)
+autoStatus.BackgroundTransparency = 1
+autoStatus.Text = “OFF”
+autoStatus.TextColor3 = Color3.fromRGB(229, 62, 62)
+autoStatus.TextScaled = true
+autoStatus.Font = Enum.Font.GothamBold
+autoStatus.Parent = autoFrame
 
-button.MouseButton1Down:Connect(function()
-    local pressTween = TweenService:Create(pressEffect, TweenInfo.new(0.1), {
-        BackgroundTransparency = 0.8
-    })
-    pressTween:Play()
-end)
+– متغيرات للوظائف
+local espConnections = {}
+local autoRandomizeConnection = nil
+local espBoxes = {}
 
-button.MouseButton1Up:Connect(function()
-    local releaseTween = TweenService:Create(pressEffect, TweenInfo.new(0.1), {
-        BackgroundTransparency = 1
-    })
-    releaseTween:Play()
-end)
-
-return button
-```
-
-end
-
-– نظام الإشعارات
-local function createNotification(message, notificationType)
-if not SystemStates.notifications then return end
-
-```
-local notification = Instance.new("Frame")
-notification.Name = "Notification"
-notification.Size = UDim2.new(0, 300, 0, 60)
-notification.Position = UDim2.new(1, 10, 1, -70)
-notification.BackgroundColor3 = notificationType == "success" and UIColors.success or 
-                               notificationType == "error" and UIColors.danger or UIColors.warning
+– وظائف التحكم
+local function showNotification(message)
+– إنشاء إشعار بسيط
+local notification = Instance.new(“Frame”)
+notification.Size = UDim2.new(0, 250, 0, 40)
+notification.Position = UDim2.new(1, -260, 0, 10)
+notification.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+notification.BackgroundTransparency = 0.1
 notification.BorderSizePixel = 0
-notification.Parent = playerGui
+notification.Parent = screenGui
 
+```
 local notifCorner = Instance.new("UICorner")
-notifCorner.CornerRadius = UDim.new(0, 10)
+notifCorner.CornerRadius = UDim.new(0, 5)
 notifCorner.Parent = notification
 
-local notifText = Instance.new("TextLabel")
-notifText.Size = UDim2.new(1, -20, 1, 0)
-notifText.Position = UDim2.new(0, 10, 0, 0)
-notifText.BackgroundTransparency = 1
-notifText.Text = message
-notifText.TextColor3 = UIColors.text
-notifText.Font = Enum.Font.Gotham
-notifText.TextSize = 14
-notifText.TextWrapped = true
-notifText.Parent = notification
+local notifLabel = Instance.new("TextLabel")
+notifLabel.Size = UDim2.new(1, -10, 1, -10)
+notifLabel.Position = UDim2.new(0, 5, 0, 5)
+notifLabel.BackgroundTransparency = 1
+notifLabel.Text = message
+notifLabel.TextColor3 = Color3.new(1, 1, 1)
+notifLabel.TextScaled = true
+notifLabel.Font = Enum.Font.Gotham
+notifLabel.Parent = notification
 
--- تحريك الإشعار
-local slideIn = TweenService:Create(notification, TweenInfo.new(0.3), {
-    Position = UDim2.new(1, -310, 1, -70)
-})
-slideIn:Play()
-
--- إخفاء الإشعار تلقائياً
-wait(3)
-local slideOut = TweenService:Create(notification, TweenInfo.new(0.3), {
-    Position = UDim2.new(1, 10, 1, -70)
-})
-slideOut:Play()
-slideOut.Completed:Connect(function()
-    notification:Destroy()
-end)
+-- حذف الإشعار بعد 3 ثوان
+game:GetService("Debris"):AddItem(notification, 3)
 ```
 
 end
 
-– وظائف النظام المحسنة
-local EggSystem = {}
-
-function EggSystem.detectEggs()
-local eggs = {}
-local searchAreas = {game.Workspace, game.Workspace.Map}
+– وظيفة ESP للاعبين
+local function createESPBox(part)
+local espGui = Instance.new(“BillboardGui”)
+espGui.Name = “ESPBox”
+espGui.Adornee = part
+espGui.Size = UDim2.new(4, 0, 6, 0)
+espGui.StudsOffset = Vector3.new(0, 0, 0)
+espGui.Parent = part
 
 ```
-for _, area in pairs(searchAreas) do
-    if area then
-        for _, obj in pairs(area:GetDescendants()) do
-            if obj:IsA("Model") or obj:IsA("Part") then
-                local name = obj.Name:lower()
-                if name:find("egg") or name:find("spawn") or name:find("hatch") then
-                    table.insert(eggs, obj)
-                end
-            end
-        end
-    end
+local espFrame = Instance.new("Frame")
+espFrame.Size = UDim2.new(1, 0, 1, 0)
+espFrame.BackgroundTransparency = 1
+espFrame.BorderSizePixel = 2
+espFrame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+espFrame.Parent = espGui
+
+local espCorner = Instance.new("UICorner")
+espCorner.CornerRadius = UDim.new(0, 4)
+espCorner.Parent = espFrame
+
+-- إضافة اسم اللاعب
+local nameLabel = Instance.new("TextLabel")
+nameLabel.Size = UDim2.new(1, 0, 0, 20)
+nameLabel.Position = UDim2.new(0, 0, -0.3, 0)
+nameLabel.BackgroundTransparency = 1
+nameLabel.Text = part.Parent.Name
+nameLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+nameLabel.TextScaled = true
+nameLabel.Font = Enum.Font.GothamBold
+nameLabel.TextStrokeTransparency = 0
+nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+nameLabel.Parent = espGui
+
+return espGui
+```
+
 end
 
-createNotification("تم العثور على " .. #eggs .. " بيضة", "success")
-return eggs
-```
-
+local function enableESP()
+– ESP للاعبين
+for _, player in pairs(Players:GetPlayers()) do
+if player ~= Players.LocalPlayer and player.Character and player.Character:FindFirstChild(“HumanoidRootPart”) then
+local espBox = createESPBox(player.Character.HumanoidRootPart)
+table.insert(espBoxes, espBox)
+end
 end
 
-function EggSystem.randomizeEggs()
-local eggs = EggSystem.detectEggs()
-local randomized = 0
-
 ```
-for _, egg in pairs(eggs) do
-    if egg and egg.Parent then
-        -- محاولة تغيير خصائص البيضة
-        pcall(function()
-            if egg:IsA("Model") then
-                local primaryPart = egg.PrimaryPart or egg:FindFirstChildOfClass("Part")
-                if primaryPart then
-                    -- تغيير اللون بشكل عشوائي
-                    primaryPart.Color = Color3.fromHSV(math.random(), 1, 1)
-                    
-                    -- تأثير بصري
-                    local highlight = primaryPart:FindFirstChild("RandomizeHighlight") or Instance.new("SelectionBox")
-                    highlight.Name = "RandomizeHighlight"
-                    highlight.Adornee = primaryPart
-                    highlight.Color3 = Color3.fromRGB(255, 255, 0)
-                    highlight.Transparency = 0.5
-                    highlight.Parent = primaryPart
-                    
-                    -- إزالة التأثير بعد ثانيتين
-                    game:GetService("Debris"):AddItem(highlight, 2)
-                    
-                    randomized = randomized + 1
-                end
+-- مراقبة اللاعبين الجدد
+espConnections[1] = Players.PlayerAdded:Connect(function(player)
+    if settings.esp then
+        player.CharacterAdded:Connect(function(character)
+            if character:FindFirstChild("HumanoidRootPart") then
+                local espBox = createESPBox(character.HumanoidRootPart)
+                table.insert(espBoxes, espBox)
             end
         end)
     end
-end
-
-createNotification("تم تعديل " .. randomized .. " بيضة بنجاح", "success")
+end)
 ```
 
 end
 
-function EggSystem.toggleESP()
-SystemStates.espEnabled = not SystemStates.espEnabled
-local eggs = EggSystem.detectEggs()
+local function disableESP()
+– إزالة جميع صناديق ESP
+for _, espBox in pairs(espBoxes) do
+if espBox then
+espBox:Destroy()
+end
+end
+espBoxes = {}
 
 ```
-for _, egg in pairs(eggs) do
-    pcall(function()
-        local highlight = egg:FindFirstChild("EggESP")
-        if SystemStates.espEnabled then
-            if not highlight then
-                highlight = Instance.new("Highlight")
-                highlight.Name = "EggESP"
-                highlight.Parent = egg
-            end
-            highlight.Enabled = true
-            highlight.FillColor = UIColors.warning
-            highlight.OutlineColor = UIColors.danger
-            highlight.FillTransparency = 0.5
-        else
-            if highlight then
-                highlight:Destroy()
-            end
-        end
-    end)
+-- قطع الاتصالات
+for _, connection in pairs(espConnections) do
+    if connection then
+        connection:Disconnect()
+    end
 end
-
-createNotification("ESP " .. (SystemStates.espEnabled and "مفعل" or "معطل"), "success")
+espConnections = {}
 ```
 
 end
 
-function EggSystem.toggleAutoRandomize()
-SystemStates.autoRandomizeEnabled = not SystemStates.autoRandomizeEnabled
-
-```
-if SystemStates.autoRandomizeEnabled then
-    spawn(function()
-        while SystemStates.autoRandomizeEnabled do
-            EggSystem.randomizeEggs()
-            wait(5) -- تكرار كل 5 ثوان
-        end
-    end)
-    createNotification("التعديل التلقائي مفعل", "success")
+local function toggleESP()
+settings.esp = not settings.esp
+if settings.esp then
+espStatus.Text = “ON”
+espStatus.TextColor3 = Color3.fromRGB(72, 187, 120)
+enableESP()
+showNotification(“ESP تم تفعيله!”)
 else
-    createNotification("التعديل التلقائي معطل", "warning")
+espStatus.Text = “OFF”
+espStatus.TextColor3 = Color3.fromRGB(229, 62, 62)
+disableESP()
+showNotification(“ESP تم إيقافه!”)
+end
+end
+
+local function toggleAutoRandomize()
+settings.autoRandomize = not settings.autoRandomize
+if settings.autoRandomize then
+autoStatus.Text = “ON”
+autoStatus.TextColor3 = Color3.fromRGB(72, 187, 120)
+showNotification(“Auto Randomize تم تفعيله!”)
+
+```
+    -- تشغيل Auto Randomize كل 5 ثوان
+    autoRandomizeConnection = RunService.Heartbeat:Connect(function()
+        wait(5)
+        if settings.autoRandomize then
+            randomizePets()
+        end
+    end)
+else
+    autoStatus.Text = "OFF"
+    autoStatus.TextColor3 = Color3.fromRGB(229, 62, 62)
+    showNotification("Auto Randomize تم إيقافه!")
+    
+    if autoRandomizeConnection then
+        autoRandomizeConnection:Disconnect()
+        autoRandomizeConnection = nil
+    end
 end
 ```
 
 end
 
-– إنشاء الواجهة الكاملة
-local function buildInterface()
-local screenGui, mainFrame = createMainUI()
-local titleBar = createTitleBar(mainFrame)
+local function randomizePets()
+showNotification(“تم تشغيل Randomize Pets!”)
 
 ```
--- منطقة الأزرار
-local buttonContainer = Instance.new("ScrollingFrame")
-buttonContainer.Name = "ButtonContainer"
-buttonContainer.Size = UDim2.new(1, -20, 1, -80)
-buttonContainer.Position = UDim2.new(0, 10, 0, 70)
-buttonContainer.BackgroundTransparency = 1
-buttonContainer.BorderSizePixel = 0
-buttonContainer.ScrollBarThickness = 6
-buttonContainer.Parent = mainFrame
+-- محاولة البحث عن pets في workspace
+local pets = {}
+for _, obj in pairs(workspace:GetDescendants()) do
+    if obj:IsA("Model") and (string.find(string.lower(obj.Name), "pet") or 
+                             string.find(string.lower(obj.Name), "animal") or
+                             string.find(string.lower(obj.Name), "cat") or
+                             string.find(string.lower(obj.Name), "dog")) then
+        table.insert(pets, obj)
+    end
+end
 
-local buttonLayout = Instance.new("UIListLayout")
-buttonLayout.Padding = UDim.new(0, 10)
-buttonLayout.Parent = buttonContainer
+-- تغيير مواقع الـ pets إذا وجدت
+if #pets > 0 then
+    for _, pet in pairs(pets) do
+        if pet.PrimaryPart then
+            local randomX = math.random(-50, 50)
+            local randomZ = math.random(-50, 50)
+            pet:SetPrimaryPartCFrame(pet.PrimaryPart.CFrame + Vector3.new(randomX, 0, randomZ))
+        end
+    end
+    showNotification("تم تحريك " .. #pets .. " pets!")
+else
+    -- إنشاء تأثير بصري
+    local sparkles = Instance.new("Sparkles")
+    if Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        sparkles.Parent = Players.LocalPlayer.Character.HumanoidRootPart
+        game:GetService("Debris"):AddItem(sparkles, 3)
+    end
+    showNotification("تم تشغيل Randomize (لا توجد pets مرئية)!")
+end
 
--- إنشاء الأزرار
-local randomizeBtn = createEnhancedButton("RandomizeButton", "Randomize Eggs", "🎲", UIColors.accent, buttonContainer)
-local espBtn = createEnhancedButton("ESPButton", "ESP: OFF", "👁️", UIColors.secondary, buttonContainer)
-local autoBtn = createEnhancedButton("AutoButton", "Auto Randomize: OFF", "🔄", UIColors.success, buttonContainer)
-local settingsBtn = createEnhancedButton("SettingsButton", "Settings", "⚙️", UIColors.secondary, buttonContainer)
-local closeBtn = createEnhancedButton("CloseButton", "Close", "❌", UIColors.danger, buttonContainer)
+print("Randomizing pets executed!")
+```
 
--- زر إعادة الفتح
-local reopenBtn = createEnhancedButton("ReopenButton", "Show", "📱", UIColors.success, screenGui)
-reopenBtn.Size = UDim2.new(0, 100, 0, 40)
-reopenBtn.Position = UDim2.new(1, -110, 0.5, -20)
-reopenBtn.Visible = false
+end
 
--- ربط الوظائف
-randomizeBtn.MouseButton1Click:Connect(EggSystem.randomizeEggs)
+local function toggleMenu()
+settings.visible = not settings.visible
+mainFrame.Visible = settings.visible
+end
 
-espBtn.MouseButton1Click:Connect(function()
-    EggSystem.toggleESP()
-    espBtn.ButtonText.Text = "ESP: " .. (SystemStates.espEnabled and "ON" or "OFF")
+– ربط الأحداث
+randomizeButton.MouseButton1Click:Connect(randomizePets)
+
+– جعل ESP قابل للنقر
+local espButton = Instance.new(“TextButton”)
+espButton.Size = UDim2.new(1, 0, 1, 0)
+espButton.Position = UDim2.new(0, 0, 0, 0)
+espButton.BackgroundTransparency = 1
+espButton.Text = “”
+espButton.Parent = espFrame
+espButton.MouseButton1Click:Connect(toggleESP)
+
+– جعل Auto Randomize قابل للنقر
+local autoButton = Instance.new(“TextButton”)
+autoButton.Size = UDim2.new(1, 0, 1, 0)
+autoButton.Position = UDim2.new(0, 0, 0, 0)
+autoButton.BackgroundTransparency = 1
+autoButton.Text = “”
+autoButton.Parent = autoFrame
+autoButton.MouseButton1Click:Connect(toggleAutoRandomize)
+
+– التحكم بالكيبورد (INSERT للإظهار/الإخفاء)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+if gameProcessed then return end
+
+```
+if input.KeyCode == Enum.KeyCode.Insert then
+    toggleMenu()
+end
+```
+
 end)
 
-autoBtn.MouseButton1Click:Connect(function()
-    EggSystem.toggleAutoRandomize()
-    autoBtn.ButtonText.Text = "Auto Randomize: " .. (SystemStates.autoRandomizeEnabled and "ON" or "OFF")
+– جعل النافذة قابلة للسحب
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function update(input)
+local delta = input.Position - dragStart
+mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+header.InputBegan:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseButton1 then
+dragging = true
+dragStart = input.Position
+startPos = mainFrame.Position
+
+```
+    input.Changed:Connect(function()
+        if input.UserInputState == Enum.UserInputState.End then
+            dragging = false
+        end
+    end)
+end
+```
+
 end)
 
-settingsBtn.MouseButton1Click:Connect(function()
-    createNotification("الإعدادات قيد التطوير", "warning")
+header.InputChanged:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+update(input)
+end
 end)
 
--- تحريك النافذة
-local function animateWindow(targetPosition)
-    local tween = TweenService:Create(mainFrame, 
-        TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-        {Position = targetPosition}
-    )
+– إضافة تأثيرات hover
+local function addHoverEffect(button)
+button.MouseEnter:Connect(function()
+local tween = TweenService:Create(button, TweenInfo.new(0.1), {BackgroundTransparency = 0.1})
+tween:Play()
+end)
+
+```
+button.MouseLeave:Connect(function()
+    local tween = TweenService:Create(button, TweenInfo.new(0.1), {BackgroundTransparency = 0})
     tween:Play()
-    return tween
-end
-
-closeBtn.MouseButton1Click:Connect(function()
-    animateWindow(UDim2.new(1.2, 0, 0.5, -225))
-    reopenBtn.Visible = true
 end)
-
-reopenBtn.MouseButton1Click:Connect(function()
-    animateWindow(UDim2.new(0.5, -190, 0.5, -225))
-    reopenBtn.Visible = false
-end)
-
--- تحريك دخول النافذة
-animateWindow(UDim2.new(0.5, -190, 0.5, -225))
-
--- رسالة ترحيب
-wait(1)
-createNotification("مرحباً بك في Enhanced Egg Randomizer!", "success")
 ```
 
 end
 
-– بدء تشغيل النظام
-buildInterface()
+addHoverEffect(randomizeButton)
+
+– تفعيل ESP بشكل افتراضي عند التشغيل
+if settings.esp then
+enableESP()
+end
+
+print(“Pet Randomizer UI تم تحميله بنجاح مع الوظائف!”)
+showNotification(“Pet Randomizer UI جاهز للاستخدام!”)
