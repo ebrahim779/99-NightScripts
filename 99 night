@@ -1,0 +1,213 @@
+--// Services
+local UserInputService = game:GetService("UserInputService")
+
+--// Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/lates-lib/main/Main.lua"))()
+local Window = Library:CreateWindow({
+    Title = "99 Nights GUI",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(570, 370),
+    Transparency = 0.2,
+    Blurring = true,
+    MinimizeKeybind = Enum.KeyCode.LeftAlt,
+})
+
+local Themes = {
+    Light = {
+        Primary = Color3.fromRGB(232, 232, 232),
+        Secondary = Color3.fromRGB(255, 255, 255),
+        Component = Color3.fromRGB(245, 245, 245),
+        Interactables = Color3.fromRGB(235, 235, 235),
+        Tab = Color3.fromRGB(50, 50, 50),
+        Title = Color3.fromRGB(0, 0, 0),
+        Description = Color3.fromRGB(100, 100, 100),
+        Shadow = Color3.fromRGB(255, 255, 255),
+        Outline = Color3.fromRGB(210, 210, 210),
+        Icon = Color3.fromRGB(100, 100, 100),
+    },
+    Dark = {
+        Primary = Color3.fromRGB(30, 30, 30),
+        Secondary = Color3.fromRGB(35, 35, 35),
+        Component = Color3.fromRGB(40, 40, 40),
+        Interactables = Color3.fromRGB(45, 45, 45),
+        Tab = Color3.fromRGB(200, 200, 200),
+        Title = Color3.fromRGB(240, 240, 240),
+        Description = Color3.fromRGB(200, 200, 200),
+        Shadow = Color3.fromRGB(0, 0, 0),
+        Outline = Color3.fromRGB(40, 40, 40),
+        Icon = Color3.fromRGB(220, 220, 220),
+    },
+    Void = {
+        Primary = Color3.fromRGB(15, 15, 15),
+        Secondary = Color3.fromRGB(20, 20, 20),
+        Component = Color3.fromRGB(25, 25, 25),
+        Interactables = Color3.fromRGB(30, 30, 30),
+        Tab = Color3.fromRGB(200, 200, 200),
+        Title = Color3.fromRGB(240, 240, 240),
+        Description = Color3.fromRGB(200, 200, 200),
+        Shadow = Color3.fromRGB(0, 0, 0),
+        Outline = Color3.fromRGB(40, 40, 40),
+        Icon = Color3.fromRGB(220, 220, 220),
+    },
+}
+
+--// Set the default theme
+Window:SetTheme(Themes.Dark)
+
+--// Sections
+Window:AddTabSection({
+    Name = "Main",
+    Order = 1,
+})
+Window:AddTabSection({
+    Name = "Settings",
+    Order = 2,
+})
+
+--// Tab [MAIN]
+local Main = Window:AddTab({
+    Title = "Game Features",
+    Section = "Main",
+    Icon = "rbxassetid://11963373994"
+})
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart", 5)
+
+-- Non Interactable Section
+Window:AddSection({ Name = "Info", Tab = Main })
+Window:AddParagraph({
+    Title = "Welcome",
+    Description = "Use this GUI to enhance your 99 Nights experience!",
+    Tab = Main
+})
+
+-- Interactable Section
+Window:AddSection({ Name = "Actions", Tab = Main })
+
+-- Teleport Button
+Window:AddButton({
+    Title = "Teleport to Camp",
+    Description = "Teleports you to the Campfire.",
+    Tab = Main,
+    Callback = function()
+        local campfire = workspace:FindFirstChild("Campfire")
+        if campfire and campfire:IsA("BasePart") then
+            humanoidRootPart.CFrame = campfire.CFrame + Vector3.new(0, 5, 0)
+            Window:Notify({
+                Title = "Success",
+                Description = "Teleported to Campfire!",
+                Duration = 3
+            })
+        else
+            Window:Notify({
+                Title = "Error",
+                Description = "Campfire not found!",
+                Duration = 3
+            })
+        end
+    end,
+})
+
+-- Auto Wood Toggle
+Window:AddToggle({
+    Title = "Auto Wood",
+    Description = "Automatically collects wood from the game.",
+    Default = false,
+    Tab = Main,
+    Callback = function(value)
+        if value then
+            spawn(function()
+                while wait(1) do
+                    local woodFolder = workspace:FindFirstChild("Wood") or workspace:FindFirstChild("Resources")
+                    if woodFolder then
+                        for _, part in pairs(woodFolder:GetChildren()) do
+                            if part:IsA("Part") then
+                                part.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 2, 0)
+                                wait(0.1)
+                            end
+                        end
+                    else
+                        Window:Notify({
+                            Title = "Warning",
+                            Description = "Wood folder not found!",
+                            Duration = 3
+                        })
+                        Window:SetSetting("Auto Wood", false) -- Turn off if folder not found
+                        break
+                    end
+                end
+            end)
+            Window:Notify({
+                Title = "Started",
+                Description = "Auto Wood is now active!",
+                Duration = 3
+            })
+        else
+            Window:Notify({
+                Title = "Stopped",
+                Description = "Auto Wood is now off!",
+                Duration = 3
+            })
+        end
+    end,
+})
+
+--// Tab [SETTINGS]
+local Settings = Window:AddTab({
+    Title = "Settings",
+    Section = "Settings",
+    Icon = "rbxassetid://11293977610",
+})
+
+Window:AddKeybind({
+    Title = "Minimize Keybind",
+    Description = "Set the keybind for minimizing the GUI.",
+    Tab = Settings,
+    Callback = function(Key)
+        Window:SetSetting("Keybind", Key.KeyCode)
+    end,
+})
+
+Window:AddDropdown({
+    Title = "Set Theme",
+    Description = "Choose a theme for the GUI!",
+    Tab = Settings,
+    Options = {
+        ["Light Mode"] = "Light",
+        ["Dark Mode"] = "Dark",
+        ["Extra Dark"] = "Void",
+    },
+    Callback = function(Theme)
+        Window:SetTheme(Themes[Theme])
+    end,
+})
+
+Window:AddToggle({
+    Title = "UI Blur",
+    Description = "Enable/disable UI blur (requires graphics 8+).",
+    Default = true,
+    Tab = Settings,
+    Callback = function(Boolean)
+        Window:SetSetting("Blur", Boolean)
+    end,
+})
+
+Window:AddSlider({
+    Title = "UI Transparency",
+    Description = "Adjust the transparency of the GUI.",
+    Tab = Settings,
+    AllowDecimals = true,
+    MaxValue = 1,
+    Callback = function(Amount)
+        Window:SetSetting("Transparency", Amount)
+    end,
+})
+
+-- Initial Notification
+Window:Notify({
+    Title = "Welcome!",
+    Description = "Press Left Alt to minimize/open the GUI. Enjoy 99 Nights!",
+    Duration = 5
+})
