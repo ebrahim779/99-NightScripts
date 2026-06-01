@@ -7,6 +7,8 @@
     "dashboard"
   ],
   "scripts": {
+    "build": "npm run build -w bot && npm run build -w dashboard",
+    "start": "npm run start -w bot & npm run start -w dashboard",
     "bot:dev": "npm run dev -w bot",
     "dashboard:dev": "npm run dev -w dashboard"
   },
