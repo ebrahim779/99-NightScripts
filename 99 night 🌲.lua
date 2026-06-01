@@ -1102,7 +1102,13 @@ local function enableAutoFarm()
 			end
 		end
 	end
-	RunService.RenderStepped:Connect(autoFarm)
+	-- ⚡ Bolt: Throttled to 1Hz to prevent 60x/sec Workspace traversal
+	task.spawn(function()
+		while AutoFarmEnabled do
+			autoFarm()
+			task.wait(1)
+		end
+	end)
 end
 
 --// Main Window Setup
@@ -2291,7 +2297,13 @@ local function createMainWindow()
 						end
 					end
 				end
-				RunService.RenderStepped:Connect(autoFarm)
+				-- ⚡ Bolt: Throttled to 1Hz to prevent 60x/sec Workspace traversal
+				task.spawn(function()
+					while AutoFarmEnabled do
+						autoFarm()
+						task.wait(1)
+					end
+				end)
 			end
 		end,
 	})
