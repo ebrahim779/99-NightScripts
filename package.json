@@ -1,0 +1,16 @@
+{
+  "name": "discord-bot-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "bot",
+    "dashboard"
+  ],
+  "scripts": {
+    "bot:dev": "npm run dev -w bot",
+    "dashboard:dev": "npm run dev -w dashboard"
+  },
+  "dependencies": {
+    "@prisma/config": "^7.8.0"
+  }
+}
