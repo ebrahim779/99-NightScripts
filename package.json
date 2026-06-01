@@ -1,0 +1,21 @@
+{
+  "name": "discord-bot-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "bot",
+    "dashboard"
+  ],
+  "scripts": {
+    "build": "npm run build -w bot && npm run build -w dashboard",
+    "start": "node scripts/start.js",
+    "bot:dev": "npm run dev -w bot",
+    "dashboard:dev": "npm run dev -w dashboard",
+    "postinstall": "npx prisma generate"
+  },
+  "dependencies": {
+    "@prisma/config": "^7.8.0",
+    "concurrently": "^9.1.0"
+  }
+}
