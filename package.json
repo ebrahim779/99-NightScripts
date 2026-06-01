@@ -7,10 +7,14 @@
     "dashboard"
   ],
   "scripts": {
+    "build": "npm run build -w bot && npm run build -w dashboard",
+    "start": "concurrently \"npm run start -w bot\" \"npm run start -w dashboard\"",
     "bot:dev": "npm run dev -w bot",
-    "dashboard:dev": "npm run dev -w dashboard"
+    "dashboard:dev": "npm run dev -w dashboard",
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@prisma/config": "^7.8.0"
+    "@prisma/config": "^7.8.0",
+    "concurrently": "^9.2.1"
   }
 }
